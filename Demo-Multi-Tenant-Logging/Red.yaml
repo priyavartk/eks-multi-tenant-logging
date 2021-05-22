@@ -1,0 +1,227 @@
+---
+apiVersion: v1
+data:
+  application-log.conf: |
+    [INPUT]
+        Name                tail
+        Tag                 tenant.*
+        Path                /var/log/containers/*_tenant1_webapp-*.log
+        Docker_Mode         On
+        Docker_Mode_Flush   5
+        Docker_Mode_Parser  docker
+        Parser              nginx
+        DB                  /var/fluent-bit/state/flb_container.db
+        Mem_Buf_Limit       50MB
+        Skip_Long_Lines     On
+        Refresh_Interval    10
+        Rotate_Wait         30
+        storage.type        filesystem
+        Read_from_Head      ${READ_FROM_HEAD}
+    [FILTER]
+        Parser              nginx
+        Match               *
+    [FILTER]
+        Parser              json
+        Match               *
+    [OUTPUT]
+        Name                  stdout
+        Match                 *
+
+  
+  fluent-bit.conf: "[SERVICE]\n    Flush                     5\n    Log_Level                 debug\n
+    \   Daemon                    off\n    Parsers_File              parsers.conf\n
+    \   HTTP_Server               ${HTTP_SERVER}\n    HTTP_Listen               0.0.0.0\n
+    \   HTTP_Port                 ${HTTP_PORT}\n    storage.path              /var/fluent-bit/state/flb-storage/\n
+    \   storage.sync              normal\n    storage.checksum          off\n    storage.backlog.mem_limit
+    5M\n    \n@INCLUDE application-log.conf\n"
+  parsers.conf: |
+    [PARSER]
+        Name                docker
+        Format              json
+        Time_Key            time
+        Time_Format         %Y-%m-%dT%H:%M:%S.%LZ
+
+    [PARSER]
+        Name                container_firstline
+        Format              regex
+        Regex               (?<log>(?<="log":")\S(?!\.).*?)(?<!\\)".*(?<stream>(?<="stream":").*?)".*(?<time>\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}\.\w*).*(?=})
+        Time_Key            time
+        Time_Format         %Y-%m-%dT%H:%M:%S.%LZ
+
+    [PARSER]
+        Name                cwagent_firstline
+        Format              regex
+        Regex               (?<log>(?<="log":")\d{4}[\/-]\d{1,2}[\/-]\d{1,2}[ T]\d{2}:\d{2}:\d{2}(?!\.).*?)(?<!\\)".*(?<stream>(?<="stream":").*?)".*(?<time>\d{4}-\d{1,2}-\d{1,2}T\d{2}:\d{2}:\d{2}\.\w*).*(?=})
+        Time_Key            time
+        Time_Format         %Y-%m-%dT%H:%M:%S.%LZ
+    [PARSER]
+        Name   nginx
+        Format regex
+        Regex ^(?<remote>[^ ]*) (?<host>[^ ]*) (?<user>[^ ]*) [(?<time>[^\]]*)] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*)(?: "(?<referer>[^\"]*)" "(?<agent>[^\"]*)")?$
+        Time_Key time
+        Time_Format %d/%b/%Y:%H:%M:%S %z
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    k8s-app: fluent-bit
+  name: fluent-bit-config
+  namespace: tenant1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fluent-bit
+  namespace: tenant1
+---
+apiVersion: v1
+data:
+  cluster.name: {{cluster_name}}
+  logs.region: {{region_name}}
+  http.server: {{http_server_toggle}}
+  http.port: {{http_server_port}}
+  read.head: {{read_from_head}}
+  read.tail: {{read_from_tail}}
+kind: ConfigMap
+metadata:
+  name: fluent-bit-cluster-info
+  namespace: tenant1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    k8s-app: fluent-bit
+    kubernetes.io/cluster-service: 'true'
+    version: v1
+  name: webapp
+  namespace: tenant1
+spec:
+  selector:
+    matchLabels:
+      app: tenant1
+  template:
+    metadata:
+      labels:
+        app: tenant1
+        kubernetes.io/cluster-service: 'true'
+        version: v1
+      annotations:
+        fluentbit.io/parser: nginx
+    spec:
+      containers:
+      - image: nginx:stable
+        imagePullPolicy: IfNotPresent
+        name: webapp
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+      - env:
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              key: logs.region
+              name: fluent-bit-cluster-info
+        - name: CLUSTER_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: cluster.name
+              name: fluent-bit-cluster-info
+        - name: HTTP_SERVER
+          valueFrom:
+            configMapKeyRef:
+              key: http.server
+              name: fluent-bit-cluster-info
+        - name: HTTP_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: http.port
+              name: fluent-bit-cluster-info
+        - name: READ_FROM_HEAD
+          valueFrom:
+            configMapKeyRef:
+              key: read.head
+              name: fluent-bit-cluster-info
+        - name: READ_FROM_TAIL
+          valueFrom:
+            configMapKeyRef:
+              key: read.tail
+              name: fluent-bit-cluster-info
+        - name: HOST_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: CI_VERSION
+          value: k8s/1.3.6
+        image: public.ecr.aws/aws-observability/aws-for-fluent-bit:latest
+        imagePullPolicy: Always
+        name: fluent-bit
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 500m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: "/var/fluent-bit/state"
+          name: fluentbitstate
+        - mountPath: "/var/log"
+          name: varlog
+          readOnly: true
+        - mountPath: "/var/lib/docker/containers"
+          name: varlibdockercontainers
+          readOnly: true
+        - mountPath: "/fluent-bit/etc/"
+          name: fluent-bit-config
+        - mountPath: "/run/log/journal"
+          name: runlogjournal
+          readOnly: true
+        - mountPath: "/var/log/dmesg"
+          name: dmesg
+          readOnly: true
+      serviceAccountName: fluent-bit
+      terminationGracePeriodSeconds: 10
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      - effect: NoExecute
+        operator: Exists
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+      - hostPath:
+          path: "/var/fluent-bit/state"
+        name: fluentbitstate
+      - hostPath:
+          path: "/var/log"
+        name: varlog
+      - hostPath:
+          path: "/var/lib/docker/containers"
+        name: varlibdockercontainers
+      - configMap:
+          name: fluent-bit-config
+        name: fluent-bit-config
+      - hostPath:
+          path: "/run/log/journal"
+        name: runlogjournal
+      - hostPath:
+          path: "/var/log/dmesg"
+        name: dmesg
+---
+# Service 
+apiVersion: v1
+kind: Service
+metadata:
+  name: tenant1
+  namespace: tenant1
+spec:
+  selector:
+    app: tenant1
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
