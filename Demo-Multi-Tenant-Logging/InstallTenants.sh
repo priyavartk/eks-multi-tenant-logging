@@ -1,4 +1,6 @@
-ClusterName='workshop-demo'
+# Update Install script with your cluster name and Log region
+#run script InstallTenants.sh <nameOfTenant>
+ClusterName=<eks-cluster-name>
 LogRegion='eu-west-1'
 FluentBitHttpPort='2021'
 FluentBitReadFromHead='Off'
