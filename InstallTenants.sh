@@ -1,3 +1,4 @@
+# Replace values at line 1 and 2 below with your cluster name and regions.
 ClusterName='workshop-demo'
 LogRegion='eu-west-1'
 FluentBitHttpPort='2021'
