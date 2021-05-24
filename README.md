@@ -13,9 +13,11 @@ the script uses sed to replace config values and generate a runtime config from 
   
 If you dont need a templatised version or you have need to install different application code container for each tenant, then simply take the template and update with your tenant's application container image, rest of the config will remain same.
   
-The deployment create a Kubernetes SVC with Loadbalancer which then you can use to hit the application after deployment. The Cloudwatch logs are created in pattern "/aws/containerinsights/<CLUSTER-NAME>/<yourChosenAppName><tenant-name>.
+The deployment create a Kubernetes service with Loadbalancer which then you can use to hit the application after deployment. The Cloudwatch logs are created in pattern "/aws/containerinsights/<CLUSTER-NAME>/<yourChosenAppName><tenant-name>.
+ 
+Get your LB name/URL by running #kubectl get svc <tenant-name>
   
-  Because we are deploying nginx as a sample application code container , we are using nginx fields in processing logs for insights quesry dashboard.
+Because we are deploying nginx as a sample application code container,we are using nginx access logs fields in processing logs for insights query dashboard.
   
 Few of sample Dashboard queries for Clodwatch Logs insights looks like as below.
   
