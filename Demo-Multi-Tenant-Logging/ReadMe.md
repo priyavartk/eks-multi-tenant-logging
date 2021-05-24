@@ -5,24 +5,25 @@ The fluent-bit sidecar container relies on AWS credentials from under lying inst
 < How to Install >
 Modify InstallTenants.sh script with your EKS cluster name and region for cloudwatch log groups.
 
-*run InstallTenants.sh <tenant-name>*
+**run InstallTenants.sh <tenant-name>**
  
 The script uses unix ‘sed’ editor to replace config values and generate a runtime config from template which creates deployment defintion for kubernetes including namespace/configmaps required to run application container and fluent-bit.
   
 If you dont need a templatised version or you have need to install different application code container for each tenant, then simply take the template and update with your tenant's application container image, rest of the config will remain same.
   
 The deployment creates a Kubernetes service with  type Elastic Loadbalancer which you can use to hit the application after deployment. 
-*The Cloudwatch logs are created in pattern "/aws/containerinsights/<CLUSTER-NAME>/<yourChosenAppName><tenant-name>.*
+**The Cloudwatch logs are created in pattern "/aws/containerinsights/<CLUSTER-NAME>/<yourChosenAppName><tenant-name>.**
   
  Because we are deploying nginx as a sample application code container , we are using nginx fields in processing logs for insights quesry dashboard.
   
-*Few of sample Dashboard queries for Clodwatch Logs insights looks like as below.*
+**Few of sample Dashboard queries for Clodwatch Logs insights looks like as below.**
+ **** 
+  **"Access Logs by Pod name " (Copy/paste below query to Cloudwatch Container Insights dashboard)**
+
+  fields log,kubernetes.pod_name|filter  stream !='stderr'|  parse log '* - - [*] "* * *"* * "-" "*"' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent* 
+
+ ***If you chose to run dashboard for multiple tenants logs groups then you can create application log dashboard like below*** 
  ** 
-  *"Access Logs by Pod name " (Copy/paste below query to Cloudwatch Container Insights dashboard)*
+ *fields log,kubernetes.pod_name,kubernetes.namespace_name as tenant|filter  stream !='stderr'|  parse log '* - - [*] "* * *"* * "-" "*"' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
 
-  fields log,kubernetes.pod_name|filter  stream !='stderr'|  parse log '* - - [] " * "  * "-" ""' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
-
-  *If you chose to run dashboard for multiple tenants logs groups then you can create application log dashboard like below* 
-  
-  fields log,kubernetes.pod_name,kubernetes.namespace_name as tenant|filter  stream !='stderr'|  parse log ' - - [] " * "  * "-" "*"' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
 
