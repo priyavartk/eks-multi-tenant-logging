@@ -39,3 +39,4 @@ fields log,kubernetes.pod_name,kubernetes.namespace_name as tenant|filter  strea
 ![alt text](https://github.com/priyavartk/eks-multi-tenant-logging/blob/main/Screenshot%202021-05-24%20at%2010.30.17.png?raw=true)
 
 
+**Disclaimer: InstallTenant.sh is little modified from a default script from AWS docs**
