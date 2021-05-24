@@ -30,7 +30,7 @@ fields log,kubernetes.pod_name|filter  stream !='stderr'|  parse log '* - - [*] 
 
 **If you chose to run dashboard for multiple tenants logs groups then you can create application log dashboard like below.**
  
-fields log,kubernetes.pod_name,kubernetes.namespace_name as tenant|filter  stream !='stderr'|  parse log ' - - [] " * "  * "-" "*"' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
+fields log,kubernetes.pod_name,kubernetes.namespace_name as tenant|filter  stream !='stderr'|  parse log '* - - [*] "\* \* \*" \* \* "-" "\*"' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
 
 
 
