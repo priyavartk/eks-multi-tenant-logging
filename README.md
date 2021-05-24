@@ -4,6 +4,8 @@ This is a sample configuration and script to install and run a tenant into multi
 
 The deployment runs a sample nginx container and fluent-bit sidecar. For your pratical use case you might only need to update deployment yaml to include your app container definition.
 
+![alt text](https://github.com/priyavartk/eks-multi-tenant-logging/blob/main/Screenshot%202021-05-24%20at%2011.29.12.png?raw=true)
+
 The fluent-bit sidecar container relies on AWS credentials from under lying instances(can be Node groups IAM role) but work is in progress to annotate it with IAM roles so that we dont have to deal with EC2 IAM roles.
 
  **How to Install** 
@@ -34,7 +36,7 @@ fields log,kubernetes.pod_name,kubernetes.namespace_name as tenant|filter  strea
 
 
 
-![alt text](https://github.com/priyavartk/eks-multi-tenant-logging/blob/main/Screenshot%202021-05-24%20at%2011.29.12.png?raw=true)
+
 
 ![alt text](https://github.com/priyavartk/eks-multi-tenant-logging/blob/main/Screenshot%202021-05-24%20at%2010.30.17.png?raw=true)
 
