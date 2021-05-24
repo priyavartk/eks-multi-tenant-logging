@@ -10,7 +10,7 @@ The fluent-bit sidecar container relies on AWS credentials from under lying inst
 
 Modify InstallTenants.sh script with your EKS cluster name and region for cloudwatch log groups.
 
-**run InstallTenants.sh <tenant-name>**
+**run InstallTenants.sh tenant-name**
  
 the script uses \'sed \'to replace config values and generate a runtime config from template which creates namespace/configmaps required to run application container and fluent-bit.
   
@@ -50,18 +50,21 @@ If you dont need a templatised version or you have need to install different app
   
 The deployment create a Kubernetes service with Loadbalancer which then you can use to hit the application after deployment. The Cloudwatch logs are created in pattern "/aws/containerinsights/<CLUSTER-NAME>/<yourChosenAppName><tenant-name>.
  
-Get your LB name/URL by running #kubectl get svc <tenant-name>
+Get your LB name/URL by running 
+ 
+#kubectl get svc <tenant-name>
   
 Because we are deploying nginx as a sample application code container,we are using nginx access logs fields in processing logs for insights query dashboard.
   
 Few of sample Dashboard queries for Clodwatch Logs insights looks like as below.
   
-  "Logs by Pod name "
-  fields log,kubernetes.pod_name|filter  stream !='stderr'|  parse log '* - - [] " * "  * "-" ""' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
+  **"Logs by Pod name "**
+ 
+fields log,kubernetes.pod_name|filter  stream !='stderr'|  parse log '* - - [] " * "  * "-" ""' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
 
-  If you chose to run dashboard for multiple tenants logs groups then you can create application log dashboard like below 
+If you chose to run dashboard for multiple tenants logs groups then you can create application log dashboard like below 
   
-  fields log,kubernetes.pod_name,kubernetes.namespace_name as tenant|filter  stream !='stderr'|  parse log ' - - [] " * "  * "-" "*"' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
+fields log,kubernetes.pod_name,kubernetes.namespace_name as tenant|filter  stream !='stderr'|  parse log ' - - [] " * "  * "-" "*"' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
 
 
 
