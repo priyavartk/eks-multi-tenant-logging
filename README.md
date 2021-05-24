@@ -66,7 +66,7 @@ If you chose to run dashboard for multiple tenants logs groups then you can crea
   
 fields log,kubernetes.pod_name,kubernetes.namespace_name as tenant|filter  stream !='stderr'|  parse log ' - - [] " * "  * "-" "*"' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
 
-
+![alt text](https://github.com/priyavartk/eks-multi-tenant-logging/blob/main/Screenshot%202021-05-24%20at%2011.29.12.png?raw=true)
 
 ![alt text](https://github.com/priyavartk/eks-multi-tenant-logging/blob/main/Screenshot%202021-05-24%20at%2010.30.17.png?raw=true)
 
