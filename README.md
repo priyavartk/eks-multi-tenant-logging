@@ -1,4 +1,4 @@
-EKS-Multi-Tenant-logging using fluent-bit
+**EKS Multi-Tenant-Logging using fluent-bit and Cloudwatch Logs**
 
 This is a sample configuration and script to install and run a tenant into multi tenant configuration on Kubernetes (EKS). This examples uses namespace islolation for tenant isolation. But config can be modified further if you have logical isolation at application level.
 
