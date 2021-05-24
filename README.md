@@ -6,7 +6,8 @@ The deployment runs a sample nginx container and fluent-bit sidecar. For your pr
 
 The fluent-bit sidecar container relies on AWS credentials from under lying instances(can be Node groups IAM role) but work is in progress to annotate it with IAM roles so that we dont have to deal with EC2 IAM roles.
 
-< How to Install >
+ **How to Install** 
+
 Modify InstallTenants.sh script with your EKS cluster name and region for cloudwatch log groups.
 
 run InstallTenants.sh <tenant-name>
