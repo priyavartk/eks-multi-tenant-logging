@@ -1,6 +1,7 @@
 # Replace values at line 1 and 2 below with your cluster name and regions.
 ClusterName='workshop-demo'
 LogRegion='eu-west-1'
+# I have chosen port other than standard 2020 to allow run fluent-bit as a daemon for non tenant loggings. So this wont conflict with your fluent bit Daemonset deployment port 2020
 FluentBitHttpPort='2021'
 FluentBitReadFromHead='Off'
 tenant_name="$1"
