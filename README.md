@@ -1,4 +1,5 @@
-# EKS-Multi-Tenant-logging using fluent-bit
+EKS-Multi-Tenant-logging using fluent-bit
+
 This is a sample configuration and script to install and run a tenant into multi tenant configuration on Kubernetes (EKS). This examples uses namespace islolation for tenant isolation. But config can be modified further if you have logical isolation at application level.
 
 The deployment runs a sample nginx container and fluent-bit sidecar. For your pratical use case you might only need to update deployment yaml to include your app container definition.
@@ -23,10 +24,10 @@ Because we are deploying nginx as a sample application code container,we are usi
 Few of sample Dashboard queries for Clodwatch Logs insights looks like as below.
   
   "Logs by Pod name "
-  fields log,kubernetes.pod_name|filter  stream !='stderr'|  parse log '* - - [*] "* * *" * * "-" "*"' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
+  fields log,kubernetes.pod_name|filter  stream !='stderr'|  parse log '* - - [] " * "  * "-" ""' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
 
   If you chose to run dashboard for multiple tenants logs groups then you can create application log dashboard like below 
   
-  fields log,kubernetes.pod_name,kubernetes.namespace_name as tenant|filter  stream !='stderr'|  parse log '* - - [*] "* * *" * * "-" "*"' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
+  fields log,kubernetes.pod_name,kubernetes.namespace_name as tenant|filter  stream !='stderr'|  parse log ' - - [] " * "  * "-" "*"' as remote_addr, timestamp, request_type, location, protocol, response_code, body_bytes_sent, user_agent 
 
-
+[Image: Screenshot 2021-05-24 at 10.30.17.png]
