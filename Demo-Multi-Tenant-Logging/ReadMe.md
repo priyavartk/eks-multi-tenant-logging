@@ -5,7 +5,7 @@ The fluent-bit sidecar container relies on AWS credentials from under lying inst
 < How to Install >
 Modify InstallTenants.sh script with your EKS cluster name and region for cloudwatch log groups.
 
-**run InstallTenants.sh <tenant-name>**
+**run InstallTenants.sh <<tenant-name>> **
  
 The script uses unix ‘sed’ editor to replace config values and generate a runtime config from template which creates deployment defintion for kubernetes including namespace/configmaps required to run application container and fluent-bit.
   
