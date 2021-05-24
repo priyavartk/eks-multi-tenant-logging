@@ -1,4 +1,4 @@
-# eks-multi-tenant-logging
+# eks-multi-tenant-logging using fluent-bit
 This is a sample configuration and script to install and run a tenant into multi tenant configuration on Kubernetes (EKS). This examples uses namespace islolation for tenant isolation. But config can be modified further if you have logical isolation at application level.
 
 The deployment runs a sample nginx container and fluent-bit sidecar. For your pratical use case you might only need to update deployment yaml to include your app container definition.
